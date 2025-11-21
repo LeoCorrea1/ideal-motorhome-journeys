@@ -53,7 +53,7 @@ const Index = () => {
             <Button
               size="lg"
               onClick={() => setIsSidebarOpen(true)}
-              className="fixed top-24 left-4 z-40 bg-primary hover:bg-primary/90 shadow-lg"
+              className="fixed top-24 right-4 z-40 bg-primary hover:bg-primary/90 shadow-lg"
             >
               <Menu className="h-5 w-5 mr-2" />
               BUSCA

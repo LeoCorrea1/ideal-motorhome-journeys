@@ -11,18 +11,17 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// Custom orange marker icon - optimized
+// Ultra lightweight marker for mobile performance
 const orangeIcon = L.divIcon({
   className: "custom-marker",
   html: `
     <div style="
-      background: linear-gradient(135deg, #ff8c00, #ffa500);
-      width: 28px;
-      height: 28px;
+      background: #ff8c00;
+      width: 20px;
+      height: 20px;
       border-radius: 50% 50% 50% 0;
       transform: rotate(-45deg);
-      border: 2px solid #000;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      border: 1px solid #000;
       position: relative;
     ">
       <div style="
@@ -30,15 +29,13 @@ const orangeIcon = L.divIcon({
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) rotate(45deg);
-        color: #000;
-        font-size: 14px;
-        font-weight: bold;
+        font-size: 10px;
       ">🚐</div>
     </div>
   `,
-  iconSize: [28, 28],
-  iconAnchor: [14, 28],
-  popupAnchor: [0, -28],
+  iconSize: [20, 20],
+  iconAnchor: [10, 20],
+  popupAnchor: [0, -20],
 });
 
 interface MapViewProps {
@@ -56,26 +53,32 @@ const MapView = memo(({ customers, selectedCustomer }: MapViewProps) => {
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    // Create map centered on Brazil with performance optimizations
+    // Create map centered on Brazil with maximum performance optimizations
     map.current = L.map(mapContainer.current, {
       center: [-15.7801, -47.9292],
       zoom: 5,
       minZoom: 4,
-      maxZoom: 18,
+      maxZoom: 16,
       zoomControl: true,
       preferCanvas: true,
-      zoomAnimation: true,
+      zoomAnimation: false,
       fadeAnimation: false,
       markerZoomAnimation: false,
+      inertia: false,
+      zoomSnap: 0.5,
+      wheelDebounceTime: 100,
+      wheelPxPerZoomLevel: 120,
     });
 
-    // Add OpenStreetMap tiles with performance optimizations
+    // Add OpenStreetMap tiles with maximum performance optimizations
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19,
+      attribution: '© OpenStreetMap',
+      maxZoom: 16,
       updateWhenIdle: true,
       updateWhenZooming: false,
-      keepBuffer: 2,
+      keepBuffer: 1,
+      tileSize: 256,
+      detectRetina: false,
     }).addTo(map.current);
 
     setIsMapReady(true);
