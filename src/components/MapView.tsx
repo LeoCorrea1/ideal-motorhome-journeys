@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, memo } from "react";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Customer } from "@/data/customers";
@@ -11,17 +11,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// Ultra lightweight marker for mobile performance
+// Custom orange marker icon
 const orangeIcon = L.divIcon({
   className: "custom-marker",
   html: `
     <div style="
-      background: #ff8c00;
-      width: 20px;
-      height: 20px;
+      background: linear-gradient(135deg, #ff8c00, #ffa500);
+      width: 32px;
+      height: 32px;
       border-radius: 50% 50% 50% 0;
       transform: rotate(-45deg);
-      border: 1px solid #000;
+      border: 3px solid #000;
+      box-shadow: 0 0 20px rgba(255, 140, 0, 0.6);
       position: relative;
     ">
       <div style="
@@ -29,13 +30,15 @@ const orangeIcon = L.divIcon({
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) rotate(45deg);
-        font-size: 10px;
+        color: #000;
+        font-size: 16px;
+        font-weight: bold;
       ">🚐</div>
     </div>
   `,
-  iconSize: [20, 20],
-  iconAnchor: [10, 20],
-  popupAnchor: [0, -20],
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
 });
 
 interface MapViewProps {
@@ -43,7 +46,7 @@ interface MapViewProps {
   selectedCustomer: Customer | null;
 }
 
-const MapView = memo(({ customers, selectedCustomer }: MapViewProps) => {
+const MapView = ({ customers, selectedCustomer }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const markers = useRef<Map<number, L.Marker>>(new Map());
@@ -53,32 +56,19 @@ const MapView = memo(({ customers, selectedCustomer }: MapViewProps) => {
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    // Create map centered on Brazil with maximum performance optimizations
+    // Create map centered on Brazil
     map.current = L.map(mapContainer.current, {
       center: [-15.7801, -47.9292],
       zoom: 5,
       minZoom: 4,
-      maxZoom: 16,
+      maxZoom: 18,
       zoomControl: true,
-      preferCanvas: true,
-      zoomAnimation: false,
-      fadeAnimation: false,
-      markerZoomAnimation: false,
-      inertia: false,
-      zoomSnap: 0.5,
-      wheelDebounceTime: 100,
-      wheelPxPerZoomLevel: 120,
     });
 
-    // Add OpenStreetMap tiles with maximum performance optimizations
+    // Add OpenStreetMap tiles
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '© OpenStreetMap',
-      maxZoom: 16,
-      updateWhenIdle: true,
-      updateWhenZooming: false,
-      keepBuffer: 1,
-      tileSize: 256,
-      detectRetina: false,
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19,
     }).addTo(map.current);
 
     setIsMapReady(true);
@@ -130,9 +120,9 @@ const MapView = memo(({ customers, selectedCustomer }: MapViewProps) => {
     if (marker) {
       map.current.setView([selectedCustomer.lat, selectedCustomer.lng], 12, {
         animate: true,
-        duration: 0.5,
+        duration: 1,
       });
-      setTimeout(() => marker.openPopup(), 300);
+      marker.openPopup();
     }
   }, [selectedCustomer]);
 
@@ -141,13 +131,13 @@ const MapView = memo(({ customers, selectedCustomer }: MapViewProps) => {
       <div ref={mapContainer} className="absolute inset-0 z-0" />
       <style>{`
         .leaflet-popup-content-wrapper {
-          background: rgba(0, 0, 0, 0.95);
+          background: rgba(0, 0, 0, 0.9);
           border: 2px solid #ff8c00;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+          border-radius: 12px;
+          box-shadow: 0 0 30px rgba(255, 140, 0, 0.4);
         }
         .leaflet-popup-tip {
-          background: rgba(0, 0, 0, 0.95);
+          background: rgba(0, 0, 0, 0.9);
           border-top: 2px solid #ff8c00;
           border-right: 2px solid #ff8c00;
         }
@@ -155,14 +145,11 @@ const MapView = memo(({ customers, selectedCustomer }: MapViewProps) => {
           background: #0a0a0a;
         }
         .custom-marker {
-          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-        .leaflet-tile {
-          will-change: transform;
+          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
         }
       `}</style>
     </div>
   );
-});
+};
 
 export default MapView;

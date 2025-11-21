@@ -1,4 +1,4 @@
-import { useState, useMemo, memo } from "react";
+import { useState } from "react";
 import { Search, X, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,17 +12,14 @@ interface CustomerSidebarProps {
   isMobile: boolean;
 }
 
-const CustomerSidebar = memo(({ isOpen, onClose, onCustomerClick, isMobile }: CustomerSidebarProps) => {
+const CustomerSidebar = ({ isOpen, onClose, onCustomerClick, isMobile }: CustomerSidebarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredCustomers = useMemo(() => 
-    customers.filter(
-      (customer) =>
-        customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        customer.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        customer.state.toLowerCase().includes(searchTerm.toLowerCase())
-    ),
-    [searchTerm]
+  const filteredCustomers = customers.filter(
+    (customer) =>
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.state.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -30,7 +27,7 @@ const CustomerSidebar = memo(({ isOpen, onClose, onCustomerClick, isMobile }: Cu
       {/* Mobile Overlay */}
       {isMobile && isOpen && (
         <div
-          className="fixed inset-0 bg-black/80 z-40"
+          className="fixed inset-0 bg-black/80 z-40 animate-fade-in"
           onClick={onClose}
         />
       )}
@@ -38,8 +35,8 @@ const CustomerSidebar = memo(({ isOpen, onClose, onCustomerClick, isMobile }: Cu
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed md:static top-0 left-0 h-full bg-card border-r border-border z-50 flex flex-col",
-          isMobile ? "w-full transition-transform duration-200" : "w-80",
+          "fixed md:static top-0 left-0 h-full bg-card border-r border-border z-50 transition-transform duration-300 ease-in-out flex flex-col",
+          isMobile ? "w-full" : "w-80",
           isMobile && !isOpen && "-translate-x-full",
           isOpen && "translate-x-0"
         )}
@@ -89,15 +86,15 @@ const CustomerSidebar = memo(({ isOpen, onClose, onCustomerClick, isMobile }: Cu
                   onCustomerClick(customer);
                   if (isMobile) onClose();
                 }}
-                className="w-full text-left p-3 rounded-lg bg-muted/50 hover:bg-muted border border-border transition-colors"
+                className="w-full text-left p-3 rounded-lg bg-muted/50 hover:bg-muted border border-border hover:border-primary transition-all group"
               >
                 <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-primary mt-1 flex-shrink-0" />
+                  <MapPin className="h-4 w-4 text-primary mt-1 group-hover:animate-pulse-glow" />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">
+                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
                       {customer.name}
                     </h3>
-                    <p className="text-sm text-muted-foreground truncate">
+                    <p className="text-sm text-muted-foreground">
                       {customer.city}, {customer.state}
                     </p>
                   </div>
@@ -117,6 +114,6 @@ const CustomerSidebar = memo(({ isOpen, onClose, onCustomerClick, isMobile }: Cu
       </aside>
     </>
   );
-});
+};
 
 export default CustomerSidebar;
