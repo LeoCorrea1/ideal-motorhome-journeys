@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Customer } from "@/data/customers";
@@ -11,18 +11,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// Custom orange marker icon
+// Custom orange marker icon - optimized
 const orangeIcon = L.divIcon({
   className: "custom-marker",
   html: `
     <div style="
       background: linear-gradient(135deg, #ff8c00, #ffa500);
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       border-radius: 50% 50% 50% 0;
       transform: rotate(-45deg);
-      border: 3px solid #000;
-      box-shadow: 0 0 20px rgba(255, 140, 0, 0.6);
+      border: 2px solid #000;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
       position: relative;
     ">
       <div style="
@@ -31,14 +31,14 @@ const orangeIcon = L.divIcon({
         left: 50%;
         transform: translate(-50%, -50%) rotate(45deg);
         color: #000;
-        font-size: 16px;
+        font-size: 14px;
         font-weight: bold;
       ">🚐</div>
     </div>
   `,
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
+  iconSize: [28, 28],
+  iconAnchor: [14, 28],
+  popupAnchor: [0, -28],
 });
 
 interface MapViewProps {
@@ -46,7 +46,7 @@ interface MapViewProps {
   selectedCustomer: Customer | null;
 }
 
-const MapView = ({ customers, selectedCustomer }: MapViewProps) => {
+const MapView = memo(({ customers, selectedCustomer }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const markers = useRef<Map<number, L.Marker>>(new Map());
@@ -56,19 +56,26 @@ const MapView = ({ customers, selectedCustomer }: MapViewProps) => {
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    // Create map centered on Brazil
+    // Create map centered on Brazil with performance optimizations
     map.current = L.map(mapContainer.current, {
       center: [-15.7801, -47.9292],
       zoom: 5,
       minZoom: 4,
       maxZoom: 18,
       zoomControl: true,
+      preferCanvas: true,
+      zoomAnimation: true,
+      fadeAnimation: false,
+      markerZoomAnimation: false,
     });
 
-    // Add OpenStreetMap tiles
+    // Add OpenStreetMap tiles with performance optimizations
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 19,
+      updateWhenIdle: true,
+      updateWhenZooming: false,
+      keepBuffer: 2,
     }).addTo(map.current);
 
     setIsMapReady(true);
@@ -120,9 +127,9 @@ const MapView = ({ customers, selectedCustomer }: MapViewProps) => {
     if (marker) {
       map.current.setView([selectedCustomer.lat, selectedCustomer.lng], 12, {
         animate: true,
-        duration: 1,
+        duration: 0.5,
       });
-      marker.openPopup();
+      setTimeout(() => marker.openPopup(), 300);
     }
   }, [selectedCustomer]);
 
@@ -131,13 +138,13 @@ const MapView = ({ customers, selectedCustomer }: MapViewProps) => {
       <div ref={mapContainer} className="absolute inset-0 z-0" />
       <style>{`
         .leaflet-popup-content-wrapper {
-          background: rgba(0, 0, 0, 0.9);
+          background: rgba(0, 0, 0, 0.95);
           border: 2px solid #ff8c00;
-          border-radius: 12px;
-          box-shadow: 0 0 30px rgba(255, 140, 0, 0.4);
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
         }
         .leaflet-popup-tip {
-          background: rgba(0, 0, 0, 0.9);
+          background: rgba(0, 0, 0, 0.95);
           border-top: 2px solid #ff8c00;
           border-right: 2px solid #ff8c00;
         }
@@ -145,11 +152,14 @@ const MapView = ({ customers, selectedCustomer }: MapViewProps) => {
           background: #0a0a0a;
         }
         .custom-marker {
-          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        .leaflet-tile {
+          will-change: transform;
         }
       `}</style>
     </div>
   );
-};
+});
 
 export default MapView;

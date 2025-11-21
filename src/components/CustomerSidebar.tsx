@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, memo } from "react";
 import { Search, X, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,14 +12,17 @@ interface CustomerSidebarProps {
   isMobile: boolean;
 }
 
-const CustomerSidebar = ({ isOpen, onClose, onCustomerClick, isMobile }: CustomerSidebarProps) => {
+const CustomerSidebar = memo(({ isOpen, onClose, onCustomerClick, isMobile }: CustomerSidebarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredCustomers = customers.filter(
-    (customer) =>
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.state.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCustomers = useMemo(() => 
+    customers.filter(
+      (customer) =>
+        customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.state.toLowerCase().includes(searchTerm.toLowerCase())
+    ),
+    [searchTerm]
   );
 
   return (
@@ -27,7 +30,7 @@ const CustomerSidebar = ({ isOpen, onClose, onCustomerClick, isMobile }: Custome
       {/* Mobile Overlay */}
       {isMobile && isOpen && (
         <div
-          className="fixed inset-0 bg-black/80 z-40 animate-fade-in"
+          className="fixed inset-0 bg-black/80 z-40"
           onClick={onClose}
         />
       )}
@@ -35,8 +38,8 @@ const CustomerSidebar = ({ isOpen, onClose, onCustomerClick, isMobile }: Custome
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed md:static top-0 left-0 h-full bg-card border-r border-border z-50 transition-transform duration-300 ease-in-out flex flex-col",
-          isMobile ? "w-full" : "w-80",
+          "fixed md:static top-0 left-0 h-full bg-card border-r border-border z-50 flex flex-col",
+          isMobile ? "w-full transition-transform duration-200" : "w-80",
           isMobile && !isOpen && "-translate-x-full",
           isOpen && "translate-x-0"
         )}
@@ -86,15 +89,15 @@ const CustomerSidebar = ({ isOpen, onClose, onCustomerClick, isMobile }: Custome
                   onCustomerClick(customer);
                   if (isMobile) onClose();
                 }}
-                className="w-full text-left p-3 rounded-lg bg-muted/50 hover:bg-muted border border-border hover:border-primary transition-all group"
+                className="w-full text-left p-3 rounded-lg bg-muted/50 hover:bg-muted border border-border transition-colors"
               >
                 <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-primary mt-1 group-hover:animate-pulse-glow" />
+                  <MapPin className="h-4 w-4 text-primary mt-1 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+                    <h3 className="font-semibold text-foreground truncate">
                       {customer.name}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground truncate">
                       {customer.city}, {customer.state}
                     </p>
                   </div>
@@ -114,6 +117,6 @@ const CustomerSidebar = ({ isOpen, onClose, onCustomerClick, isMobile }: Custome
       </aside>
     </>
   );
-};
+});
 
 export default CustomerSidebar;

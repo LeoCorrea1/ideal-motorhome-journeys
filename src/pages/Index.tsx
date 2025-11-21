@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -13,9 +13,9 @@ const Index = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const isMobile = useIsMobile();
 
-  const handleCustomerClick = (customer: Customer) => {
+  const handleCustomerClick = useCallback((customer: Customer) => {
     setSelectedCustomer(customer);
-  };
+  }, []);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-background">
@@ -53,7 +53,7 @@ const Index = () => {
             <Button
               size="lg"
               onClick={() => setIsSidebarOpen(true)}
-              className="fixed top-24 left-4 z-40 bg-primary hover:bg-primary/90 shadow-glow-orange"
+              className="fixed top-24 left-4 z-40 bg-primary hover:bg-primary/90 shadow-lg"
             >
               <Menu className="h-5 w-5 mr-2" />
               BUSCA
